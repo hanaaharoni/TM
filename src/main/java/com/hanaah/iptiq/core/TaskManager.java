@@ -6,10 +6,13 @@ import com.hanaah.iptiq.model.Priority;
 import com.hanaah.iptiq.model.Process;
 import com.hanaah.iptiq.model.SortBy;
 
+import java.util.Comparator;
 import java.util.List;
 
 public interface TaskManager {
-	List<Process> listRunningProcess(SortBy sortBy);
+
+
+	List<Process> listRunningProcess(Comparator<Process> comparator);
 
 	void addProcess(Process process) throws MaximumCapacityReachedException;
 

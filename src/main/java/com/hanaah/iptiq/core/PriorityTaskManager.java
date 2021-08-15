@@ -9,41 +9,41 @@ import lombok.Synchronized;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PriorityTaskManager extends PriorityQueue<Process> implements TaskManager {
+public class PriorityTaskManager extends DefaultTaskManager {
 
-	private final int capacity;
+	private final PriorityQueue<Process> processQueue;
 
 	public PriorityTaskManager(int capacity) {
-		super(capacity, (a, b) -> {
+		super(capacity);
+		this.processQueue = new PriorityQueue<>((a, b) -> {
 			if (a.getPriority() == b.getPriority()) {
 				return a.getCreationTimestamp().compareTo(b.getCreationTimestamp());
 			} else {
 				return a.getPriority().compareTo(b.getPriority());
 			}
 		});
-		this.capacity = capacity;
 	}
 
 	@Override
 	@Synchronized
 	public void addProcess(Process process) {
-		if (!this.isEmpty() && this.size() >= this.capacity) {
-			Process processToBeKilled = this.poll();
+		if (!this.processQueue.isEmpty() && this.processQueue.size() >= this.capacity) {
+			Process processToBeKilled = this.processQueue.poll();
 			processToBeKilled.kill();
 		}
-		super.add(process);
+		this.processQueue.add(process);
 	}
 
 	@Override
-	public List<Process> listRunningProcess(SortBy sortBy) {
-		return new ArrayList<>(this);
+	public List<Process> listRunningProcess(Comparator<Process> c) {
+		return this.processQueue.stream().sorted(c).collect(Collectors.toList());
 	}
 
 	@Override
 	@Synchronized
 	public void killProcess(String pid) throws ProcessNotFoundException {
 		UUID id = UUID.fromString(pid);
-		Optional<Process> process = this.stream().filter(p -> p.getPid().equals(id)).findFirst();
+		Optional<Process> process = this.processQueue.stream().filter(p -> p.getPid().equals(id)).findFirst();
 		if (process.isPresent()) {
 			process.get().kill();
 		} else {
@@ -54,17 +54,10 @@ public class PriorityTaskManager extends PriorityQueue<Process> implements TaskM
 	@Override
 	@Synchronized
 	public void killGroup(Priority priority) {
-		List<Process> groupToKill = this.stream()
+		List<Process> groupToKill = this.processQueue.stream()
 				.filter(process -> process.getPriority().equals(priority))
-				.peek(this::remove)
+				.peek(this.processQueue::remove)
 				.collect(Collectors.toList());
 		groupToKill.forEach(Process::kill);
-	}
-
-	@Override
-	@Synchronized
-	public void killAll() {
-		this.forEach(Process::kill);
-		this.clear();
 	}
 }

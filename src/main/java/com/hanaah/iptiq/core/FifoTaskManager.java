@@ -1,43 +1,45 @@
 package com.hanaah.iptiq.core;
 
-import com.hanaah.iptiq.exception.MaximumCapacityReachedException;
 import com.hanaah.iptiq.exception.ProcessNotFoundException;
 import com.hanaah.iptiq.model.Priority;
 import com.hanaah.iptiq.model.Process;
-import com.hanaah.iptiq.model.SortBy;
 import lombok.Synchronized;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class FifoTaskManager extends LinkedList<Process> implements TaskManager {
+public class FifoTaskManager extends DefaultTaskManager {
 
-	private final int capacity;
+	private final Queue<Process> processQueue;
 
 	public FifoTaskManager(int capacity) {
-		this.capacity = capacity;
+		super(capacity);
+		this.processQueue = new LinkedList<>();
 	}
 
 	@Override
 	@Synchronized
-	public void addProcess(Process process) throws MaximumCapacityReachedException {
-		if (super.size() >= this.capacity) {
-			throw new MaximumCapacityReachedException(String.format("Maximum capacity of [%d] was reached.", capacity));
+	public void addProcess(Process process) {
+		if (processQueue.size() >= this.capacity) {
+			Process processToKill = processQueue.peek();
+			if (processToKill != null) {
+				processToKill.kill();
+				processQueue.poll();
+			}
 		}
-		super.removeFirst();
-		super.add(process);
+		processQueue.add(process);
 	}
 
 	@Override
-	public List<Process> listRunningProcess(SortBy sortBy) {
-		return new ArrayList<>(this);
+	public List<Process> listRunningProcess(Comparator<Process> comparator) {
+		return this.processQueue.stream().sorted(comparator).collect(Collectors.toList());
 	}
 
 	@Override
 	@Synchronized
 	public void killProcess(String pid) throws ProcessNotFoundException {
 		UUID id = UUID.fromString(pid);
-		Optional<Process> process = this.stream().filter(p -> p.getPid().equals(id)).findFirst();
+		Optional<Process> process = this.processQueue.stream().filter(p -> p.getPid().equals(id)).findFirst();
 		if (process.isPresent()) {
 			process.get().kill();
 		} else {
@@ -48,17 +50,10 @@ public class FifoTaskManager extends LinkedList<Process> implements TaskManager 
 	@Override
 	@Synchronized
 	public void killGroup(Priority priority) {
-		List<Process> groupToKill = this.stream()
+		List<Process> groupToKill = this.processQueue.stream()
 				.filter(process -> process.getPriority().equals(priority))
-				.peek(this::remove)
+				.peek(this.processQueue::remove)
 				.collect(Collectors.toList());
 		groupToKill.forEach(Process::kill);
-	}
-
-	@Override
-	@Synchronized
-	public void killAll() {
-		this.forEach(Process::kill);
-		this.clear();
 	}
 }

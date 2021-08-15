@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class TaskManagerConfiguration {
 
 	@Bean
-	public ModelMapper objectMapper() {
+	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
 

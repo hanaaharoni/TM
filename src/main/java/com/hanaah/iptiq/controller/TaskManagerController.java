@@ -34,7 +34,7 @@ public class TaskManagerController {
 	@GetMapping("/task-manager/processes")
 	public List<ProcessDto> getRunningProcesses(@RequestParam SortByDto sortByDto) {
 		SortBy sortBy = this.modelMapper.map(sortByDto, SortBy.class);
-		return taskManager.listRunningProcess(sortBy).stream()
+		return taskManager.listRunningProcess(sortBy.comparator()).stream()
 				.map(process -> this.modelMapper.map(process, ProcessDto.class))
 				.collect(Collectors.toList());
 	}
@@ -46,7 +46,7 @@ public class TaskManagerController {
 		this.taskManager.addProcess(new Process(priority));
 	}
 
-	@DeleteMapping("/task-manager/delete-process/{pid}")
+	@DeleteMapping("/task-manager/kill-process/{pid}")
 	public void deleteProcess(@PathVariable String pid) throws ProcessNotFoundException {
 		this.taskManager.killProcess(pid);
 	}
