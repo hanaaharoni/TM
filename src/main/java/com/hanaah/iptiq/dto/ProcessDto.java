@@ -1,4 +1,4 @@
-package com.hanaah.iptiq.model.dto;
+package com.hanaah.iptiq.dto;
 
 import com.hanaah.iptiq.model.Priority;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProcessDto {
-	private UUID pid;
+	private UUID processId;
 	private Priority priority;
 	private Date creationTimestamp;
 }

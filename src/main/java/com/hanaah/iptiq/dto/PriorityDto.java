@@ -1,4 +1,4 @@
-package com.hanaah.iptiq.model.dto;
+package com.hanaah.iptiq.dto;
 
 public enum PriorityDto {
 	LOW,

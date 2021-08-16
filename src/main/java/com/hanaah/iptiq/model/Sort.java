@@ -5,15 +5,15 @@ import lombok.Getter;
 import java.util.Comparator;
 
 @Getter
-public enum SortBy {
-	PID,
+public enum Sort {
+	PROCESS_ID,
 	CREATION_DATE,
 	PRIORITY;
 
 	public Comparator<Process> comparator(){
 		switch (this){
-			case PID:
-				return Comparator.comparing(Process::getPid);
+			case PROCESS_ID:
+				return Comparator.comparing(Process::getProcessId);
 			case PRIORITY:
 				return Comparator.comparing(Process::getPriority);
 			default:

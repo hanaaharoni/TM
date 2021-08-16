@@ -1,8 +1,11 @@
 package com.hanaah.iptiq.core.config;
 
-import com.hanaah.iptiq.core.DefaultTaskManager;
+import com.hanaah.iptiq.core.FifoTaskManager;
+import com.hanaah.iptiq.core.PrefixCapacityTaskManager;
+import com.hanaah.iptiq.core.PriorityTaskManager;
 import com.hanaah.iptiq.core.TaskManager;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +14,14 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 public class TaskManagerConfiguration {
 
+	private final int capacity;
+	private final String type;
+
+	public TaskManagerConfiguration(@Value("${task.manager.capacity}") int capacity, @Value("${task.manager.type}") String type) {
+		this.capacity = capacity;
+		this.type = type;
+	}
+
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
@@ -18,6 +29,15 @@ public class TaskManagerConfiguration {
 
 	@Bean
 	public TaskManager taskManager() {
-		return new DefaultTaskManager(5);
+		if (("fifo").equals(this.type)) {
+			return new FifoTaskManager(this.capacity);
+		}
+		if (("prefixed").equals(this.type)) {
+			return new PrefixCapacityTaskManager(this.capacity);
+		}
+		if (("priority").equals(this.type)) {
+			return new PriorityTaskManager(this.capacity);
+		}
+		throw new IllegalArgumentException("Please specify task manager management type in application.configuration. [fifo/prefixed/priority]");
 	}
 }

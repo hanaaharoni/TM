@@ -4,19 +4,21 @@ import com.hanaah.iptiq.exception.MaximumCapacityReachedException;
 import com.hanaah.iptiq.exception.ProcessNotFoundException;
 import com.hanaah.iptiq.model.Priority;
 import com.hanaah.iptiq.model.Process;
-import com.hanaah.iptiq.model.SortBy;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
+// TODO: you can document the methods here to make it easier for the implemented of this interface.
 public interface TaskManager {
 
+	List<Process> listRunningProcess();
 
-	List<Process> listRunningProcess(Comparator<Process> comparator);
+	void addProcess(Priority Priority) throws MaximumCapacityReachedException;
 
-	void addProcess(Process process) throws MaximumCapacityReachedException;
-
-	void killProcess(String pid) throws ProcessNotFoundException;
+	void killProcess(UUID processId) throws ProcessNotFoundException;
 
 	void killGroup(Priority priority);
 
