@@ -12,7 +12,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProcessDto {
-	private UUID processId;
-	private Priority priority;
-	private Date creationTimestamp;
+
+    private UUID processId;
+    private Priority priority;
+    private Date creationTimestamp;
 }

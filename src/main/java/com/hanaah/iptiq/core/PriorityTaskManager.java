@@ -1,90 +1,105 @@
 package com.hanaah.iptiq.core;
 
+import com.hanaah.iptiq.exception.ProcessAlreadyExistsException;
 import com.hanaah.iptiq.exception.ProcessNotFoundException;
 import com.hanaah.iptiq.model.Priority;
 import com.hanaah.iptiq.model.Process;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Synchronized;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Getter(AccessLevel.PRIVATE)
 public class PriorityTaskManager implements TaskManager {
 
-	private final int capacity;
-	private final Map<Priority, Map<UUID, Process>> processQueue;
+    private final int capacity;
+    private final Map<Priority, Map<UUID, Process>> processQueue;
 
-	public PriorityTaskManager(int capacity) {
-		this.capacity = capacity;
-		this.processQueue = new TreeMap<>();
-		for (Priority p : Priority.values()) {
-			this.getProcessQueue().put(p, new LinkedHashMap<>());
-		}
-	}
+    public PriorityTaskManager(int capacity) {
+        this.capacity = capacity;
+        this.processQueue = new TreeMap<>();
+        for (Priority p : Priority.values()) {
+            this.getProcessQueue().put(p, new LinkedHashMap<>());
+        }
+    }
 
-	@Override
-	@Synchronized
-	public void addProcess(Priority priority) {
-		if (this.getProcessQueue().size() >= this.getCapacity()) {
-			Optional<Priority> lowestPriority = this.getProcessQueue().entrySet()
-					.stream()
-					.filter(priorityMapEntry -> !priorityMapEntry.getValue().isEmpty())
-					.map(Map.Entry::getKey)
-					.findFirst();
-			lowestPriority.ifPresent(lowPrior -> {
-				Optional<Process> processToKill = this.getProcessQueue().get(lowPrior).values().stream().findFirst();
-				processToKill.ifPresent(pr -> {
-					pr.kill();
-					this.getProcessQueue().get(lowPrior).remove(pr.getProcessId());
-				});
-			});
-		}
-		Process process = new Process(priority);
-		this.getProcessQueue().get(process.getPriority()).put(process.getProcessId(), process);
-	}
+    @Override
+    @Synchronized
+    public void addProcess(Process newProcess) throws ProcessAlreadyExistsException {
+        if (findProcess(newProcess.getProcessId()).isPresent()) {
+            throw new ProcessAlreadyExistsException(newProcess.getProcessId());
+        }
+        if (this.getSize() >= this.getCapacity()) {
+            Optional<Priority> lowestPriority = this.getProcessQueue().entrySet()
+                .stream()
+                .filter(priorityMapEntry -> !priorityMapEntry.getValue().isEmpty())
+                .map(Map.Entry::getKey)
+                .findFirst();
+            lowestPriority.ifPresent(lowPrior -> {
+                Optional<Process> processToKill = this.getProcessQueue().get(lowPrior).values()
+                    .stream().findFirst();
+                processToKill.ifPresent(pr -> {
+                    pr.kill();
+                    this.getProcessQueue().get(lowPrior).remove(pr.getProcessId());
+                });
+            });
+        }
+        this.getProcessQueue().get(newProcess.getPriority())
+            .put(newProcess.getProcessId(), newProcess);
+    }
 
-	@Override
-	public List<Process> listRunningProcess() {
-		return this.getProcessQueue()
-				.values()
-				.stream()
-				.map(Map::values)
-				.flatMap(Collection::stream)
-				.collect(Collectors.toList());
-	}
+    @Override
+    public List<Process> listRunningProcess() {
+        return this.getProcessQueue()
+            .values()
+            .stream()
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+    }
 
-	@Override
-	@Synchronized
-	public void killProcess(UUID processId) throws ProcessNotFoundException {
-		//TODO: try to refactor this part to a fancier code
-		Process processToKill = null;
-		for (Priority priority : this.getProcessQueue().keySet()) {
-			if (this.getProcessQueue().get(priority).containsKey(processId)) {
-				processToKill = this.getProcessQueue().get(priority).get(processId);
-				processToKill.kill();
-				this.getProcessQueue().get(priority).remove(processToKill.getProcessId());
-				break;
-			}
-		}
-		if (processToKill == null) {
-			throw new ProcessNotFoundException(processId);
-		}
-	}
+    @Override
+    @Synchronized
+    public void killProcess(UUID processId) throws ProcessNotFoundException {
+        Optional<Process> processToKill = this.findProcess(processId);
+        if (!processToKill.isPresent()) {
+            throw new ProcessNotFoundException(processId);
+        }
+        Process process = processToKill.get();
+        process.kill();
+        this.getProcessQueue().get(process.getPriority()).remove(process.getProcessId());
+    }
 
-	@Override
-	@Synchronized
-	public void killGroup(Priority priority) {
-		this.getProcessQueue().get(priority).values().forEach(Process::kill);
-		this.getProcessQueue().get(priority).clear();
-	}
+    @Override
+    @Synchronized
+    public void killGroup(Priority priority) {
+        this.getProcessQueue().get(priority).values().forEach(Process::kill);
+        this.getProcessQueue().get(priority).clear();
+    }
 
-	@Override
-	public void killAll() {
-		for (Priority priority : this.getProcessQueue().keySet()) {
-			killGroup(priority);
-		}
-	}
+    @Override
+    public void killAll() {
+        for (Priority priority : this.getProcessQueue().keySet()) {
+            killGroup(priority);
+        }
+    }
+
+    private Optional<Process> findProcess(UUID processId) {
+        return this.getProcessQueue().values().stream()
+            .filter(processMap -> processMap.containsKey(processId))
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .findFirst();
+    }
+
+    private int getSize() {
+        return this.getProcessQueue().values().stream().mapToInt(Map::size).sum();
+    }
 }

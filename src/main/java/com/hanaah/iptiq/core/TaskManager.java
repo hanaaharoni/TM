@@ -1,26 +1,49 @@
 package com.hanaah.iptiq.core;
 
 import com.hanaah.iptiq.exception.MaximumCapacityReachedException;
+import com.hanaah.iptiq.exception.ProcessAlreadyExistsException;
 import com.hanaah.iptiq.exception.ProcessNotFoundException;
 import com.hanaah.iptiq.model.Priority;
 import com.hanaah.iptiq.model.Process;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-// TODO: you can document the methods here to make it easier for the implemented of this interface.
 public interface TaskManager {
 
-	List<Process> listRunningProcess();
+    /**
+     * Lists all running processes.
+     *
+     * @return the list of running processes.
+     */
+    List<Process> listRunningProcess();
 
-	void addProcess(Priority Priority) throws MaximumCapacityReachedException;
+    /**
+     * Adds a process to the task manager.
+     *
+     * @param process the process to be added to the task manager.
+     * @throws MaximumCapacityReachedException when the task manager reaches its capacity and can no
+     *                                         longer take in more processes.
+     */
+    void addProcess(Process process)
+        throws MaximumCapacityReachedException, ProcessAlreadyExistsException;
 
-	void killProcess(UUID processId) throws ProcessNotFoundException;
+    /**
+     * Kills a process by its id.
+     *
+     * @param processId the process id we want to kill.
+     * @throws ProcessNotFoundException when the requested process is not found.
+     */
+    void killProcess(UUID processId) throws ProcessNotFoundException;
 
-	void killGroup(Priority priority);
+    /**
+     * Kills all processes belonging to a specific group.
+     *
+     * @param priority the group by which we want to kill processes.
+     */
+    void killGroup(Priority priority);
 
-	void killAll();
+    /**
+     * Kills all process in task manager.
+     */
+    void killAll();
 }
