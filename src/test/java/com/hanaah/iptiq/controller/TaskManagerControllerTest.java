@@ -34,7 +34,6 @@ import org.springframework.test.web.servlet.MvcResult;
 @SpringBootTest(classes = TaskManagerApplication.class)
 @AutoConfigureMockMvc
 @TestPropertySource(locations = {
-    "classpath:application.properties",
     "classpath:application.yml"
 })
 public class TaskManagerControllerTest {
