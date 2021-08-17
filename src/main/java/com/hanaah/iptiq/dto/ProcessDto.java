@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.UUID;
+import lombok.ToString;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class ProcessDto {
 
     private UUID processId;
