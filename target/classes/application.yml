@@ -1,5 +1,0 @@
-task.manager:
-  capacity: 10
-  type: priority
-  #type: prefixed
-  #type: fifo
