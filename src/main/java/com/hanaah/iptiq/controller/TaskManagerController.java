@@ -27,8 +27,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// TODO: remember to add exception handler (aka "advice" or "actuator") that spring offers, so that
-//  you return a helpful message to the consumer when things go wrong.
+
 @Log4j2
 @RestController
 public class TaskManagerController {

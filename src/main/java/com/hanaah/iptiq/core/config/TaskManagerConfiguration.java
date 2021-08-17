@@ -40,6 +40,6 @@ public class TaskManagerConfiguration {
             return new PriorityTaskManager(this.capacity);
         }
         throw new IllegalArgumentException(
-            "Please specify task manager management type in application.configuration. [fifo/prefixed/priority]");
+            "Please specify task manager management type in application.yml. [fifo/prefixed/priority]");
     }
 }
