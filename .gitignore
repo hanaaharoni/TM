@@ -53,3 +53,6 @@ eclipse
 *.jar.original
 *.lst
 target/
+
+.idea/
+*.iml

@@ -1,6 +1,6 @@
 # Task Manager
 
-This repo hosts a Task Manager application and an API to try it out. The task manager enables you to
+This repo hosts a Task Manager library (dependency) and an example API to try it out. The task manager enables you to
 run processes (dummy ones for now) and manage them by:
 
 - listing currently running processes (the API allows you to get them sorted as well).
@@ -9,7 +9,7 @@ run processes (dummy ones for now) and manage them by:
 - killing all processes.
 
 There are multiple ways of how the task manager manages its capacity which is possible to
-configure (see [configurations section](#configuration)).
+configure in the example API (see [configurations section](#configuration)).
 
 ## Supported Task Managers
 
@@ -41,7 +41,26 @@ configure (see [configurations section](#configuration)).
 
 ### Running the application
 
-You can run the application suing Intellij by clicking on the play button at the top bar. Or by
+First we need to build the task manager package using maven:
+
+```shell
+mvn clean install
+```
+
+Now the package is in our local maven cache and can be referenced in the `pom.xml` of your application.
+
+You can use the sample project to run the task manager or create a simple CLI application adding the task manager library to your dependencies:
+
+```xml
+    <dependency>
+      <groupId>com.hanaa.iptiq</groupId>
+      <artifactId>taskmanager</artifactId>
+      <!-- you can use the properties or replace this with the version 1.0-SNAPSHOT -->
+      <version>${taskmanager.version}</version> 
+    </dependency>
+```
+
+You can run the sample project using Intellij by clicking on the play button at the top bar. Or by
 using maven in the CLI in the following way:
 
 ```shell
@@ -72,11 +91,12 @@ file of the service. Simply set the required capacity and pick one of the possib
 In this repo we have:
 
 - **Unit Tests** using junit 5, testing the logic of the application making sure all units are
-  working as expected. it also tests negative scenarios.
-- **Integration Tests** using SpringMvc, testing the endpoints and making sure they do what they
-  promise to do. These tests ensure safer rollout.
+  working as expected. it also tests negative scenarios. these are part of the task manager library.
 
-To run the tests simply run:
+- **Integration Tests** using SpringMvc, testing the endpoints and making sure they do what they
+  promise to do. These tests ensure safer rollout. these are to test the sample API.
+
+To run the tests simply run in the respective project (task manager lib or the API):
 
 ```shell
 mvn verify
