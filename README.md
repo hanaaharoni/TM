@@ -53,7 +53,7 @@ You can use the sample project to run the task manager or create a simple CLI ap
 
 ```xml
     <dependency>
-      <groupId>com.hanaa.iptiq</groupId>
+      <groupId>com.hanaa</groupId>
       <artifactId>taskmanager</artifactId>
       <!-- you can use the properties or replace this with the version 1.0-SNAPSHOT -->
       <version>${taskmanager.version}</version> 

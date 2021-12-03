@@ -10,11 +10,11 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
-  <groupId>com.hanaah.iptiq</groupId>
+  <groupId>com.hanaah</groupId>
   <artifactId>taskmanager</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>Task Manager</name>
-  <description>Home Assessment For IPTIQ</description>
+  <description>Home Assessment</description>
 
   <properties>
     <java.version>11</java.version>
@@ -25,7 +25,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.hanaa.iptiq</groupId>
+      <groupId>com.hanaa</groupId>
       <artifactId>taskmanager</artifactId>
       <version>${taskmanager.version}</version>
     </dependency>
